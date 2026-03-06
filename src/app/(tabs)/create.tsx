@@ -1,11 +1,21 @@
-import { View, Text, TextInput, Pressable, ScrollView, Alert, ActivityIndicator, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEvents } from "../../hooks/useEvents";
 import { EventCategory } from "../../types/event";
-import { useRouter } from "expo-router";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 // Extended emoji presets with categories
 const EMOJI_CATEGORIES = {
@@ -33,32 +43,52 @@ const CATEGORY_OPTIONS: Array<{ id: EventCategory; label: string; icon: string }
   { id: "other", label: "其他", icon: "star" },
 ];
 
-// Format date to Chinese display
+// Format date to Chinese display (with time)
 function formatDateDisplay(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
   const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
   const weekday = weekdays[date.getDay()];
 
-  return `${year}年${month}月${day}日 ${weekday}`;
+  return `${year}年${month}月${day}日 ${weekday} ${hours}:${minutes}`;
 }
 
-// Format date to ISO string (YYYY-MM-DD)
+// Format date to ISO string (with time)
 function formatDateISO(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return date.toISOString();
 }
 
-// Calculate days until
-function getDaysUntil(targetDate: Date): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+// Calculate time until (returns object with days, hours, minutes)
+function getTimeUntil(targetDate: Date): { days: number; hours: number; minutes: number; isPast: boolean } {
+  const now = new Date();
   const target = new Date(targetDate);
-  target.setHours(0, 0, 0, 0);
-  return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const diffMs = target.getTime() - now.getTime();
+  const isPast = diffMs < 0;
+  const absDiffMs = Math.abs(diffMs);
+
+  const days = Math.floor(absDiffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((absDiffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  return { days, hours, minutes, isPast };
+}
+
+// Format time remaining display
+function formatTimeRemaining(timeUntil: ReturnType<typeof getTimeUntil>): string {
+  const { days, hours, minutes, isPast } = timeUntil;
+
+  if (days >= 1) {
+    return isPast ? `${days} 天前` : `${days} 天后`;
+  } else if (hours >= 1) {
+    return isPast ? `${hours} 小时 ${minutes} 分钟前` : `${hours} 小时 ${minutes} 分钟后`;
+  } else if (minutes >= 1) {
+    return isPast ? `${minutes} 分钟前` : `${minutes} 分钟后`;
+  } else {
+    return "即将到来";
+  }
 }
 
 export default function CreateEventScreen() {
@@ -71,12 +101,11 @@ export default function CreateEventScreen() {
   const [selectedCategory, setSelectedCategory] = useState<EventCategory>("exam");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
   const [creating, setCreating] = useState(false);
 
   // Emoji selection states
   const [showAllEmojis, setShowAllEmojis] = useState(false);
-  const [showCustomEmojiInput, setShowCustomEmojiInput] = useState(false);
-  const [customEmojiInput, setCustomEmojiInput] = useState("");
 
   // Category selection states
   const [customCategoryLabel, setCustomCategoryLabel] = useState("");
@@ -84,26 +113,48 @@ export default function CreateEventScreen() {
   // Display emojis (first 12 or all)
   const displayedEmojis = showAllEmojis ? ALL_EMOJIS : ALL_EMOJIS.slice(0, 12);
 
-  const handleCustomEmojiSubmit = () => {
-    const emoji = customEmojiInput.trim();
-    if (emoji) {
-      setSelectedEmoji(emoji);
-      setCustomEmojiInput("");
-      setShowCustomEmojiInput(false);
+  const timeUntil = getTimeUntil(selectedDate);
+
+  const handleDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === "android") {
+      if (pickerMode === "date") {
+        if (date) {
+          setSelectedDate(date);
+          // After selecting date, show time picker
+          setPickerMode("time");
+        } else {
+          setShowDatePicker(false);
+        }
+      } else {
+        // Time selected
+        if (date) {
+          setSelectedDate(date);
+        }
+        setShowDatePicker(false);
+        setPickerMode("date"); // Reset for next time
+      }
+    } else {
+      // iOS: just update the date
+      if (date) {
+        setSelectedDate(date);
+      }
     }
   };
 
-  const daysUntil = getDaysUntil(selectedDate);
-
-  const handleDateChange = (event: any, date?: Date) => {
-    // Android: picker closes after selection
-    if (Platform.OS === "android") {
+  const handlePickerDone = () => {
+    if (pickerMode === "date") {
+      // Switch to time picker
+      setPickerMode("time");
+    } else {
+      // Done with time selection
       setShowDatePicker(false);
+      setPickerMode("date"); // Reset
     }
+  };
 
-    if (date) {
-      setSelectedDate(date);
-    }
+  const handlePickerOpen = () => {
+    setPickerMode("date");
+    setShowDatePicker(true);
   };
 
   const handleCreate = async () => {
@@ -186,56 +237,9 @@ export default function CreateEventScreen() {
 
           {/* Emoji Selection */}
           <View className="mb-8">
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-[#3A3530] text-[13px] tracking-wide" style={{ fontWeight: "600" }}>
-                选择图标
-              </Text>
-              <Pressable
-                onPress={() => setShowCustomEmojiInput(!showCustomEmojiInput)}
-                className="flex-row items-center"
-              >
-                <SymbolView name="pencil" size={14} type="hierarchical" tintColor="#D97757" />
-                <Text className="text-[#D97757] text-[12px] ml-1" style={{ fontWeight: "500" }}>
-                  自定义
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* Custom Emoji Input */}
-            {showCustomEmojiInput && (
-              <View className="mb-3 flex-row gap-2">
-                <TextInput
-                  value={customEmojiInput}
-                  onChangeText={setCustomEmojiInput}
-                  placeholder="输入任意 emoji 😊"
-                  placeholderTextColor="#C4B5A3"
-                  className="flex-1 bg-white rounded-2xl px-4 py-3 text-[#3A3530] text-[17px]"
-                  style={{
-                    fontWeight: "400",
-                    shadowColor: "#3A3530",
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.03,
-                    shadowRadius: 8,
-                  }}
-                  onSubmitEditing={handleCustomEmojiSubmit}
-                  returnKeyType="done"
-                />
-                <Pressable
-                  onPress={handleCustomEmojiSubmit}
-                  className="bg-[#D97757] rounded-2xl px-4 items-center justify-center"
-                  style={{
-                    shadowColor: "#D97757",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 6,
-                  }}
-                >
-                  <Text className="text-white text-[14px]" style={{ fontWeight: "600" }}>
-                    确定
-                  </Text>
-                </Pressable>
-              </View>
-            )}
+            <Text className="text-[#3A3530] text-[13px] mb-3 tracking-wide" style={{ fontWeight: "600" }}>
+              选择图标
+            </Text>
 
             {/* Emoji Grid */}
             <View className="flex-row flex-wrap gap-3">
@@ -243,9 +247,8 @@ export default function CreateEventScreen() {
                 <Pressable
                   key={`${emoji}-${index}`}
                   onPress={() => setSelectedEmoji(emoji)}
-                  className={`w-14 h-14 rounded-2xl items-center justify-center ${
-                    selectedEmoji === emoji ? "bg-[#D97757]" : "bg-white"
-                  }`}
+                  className={`w-14 h-14 rounded-2xl items-center justify-center ${selectedEmoji === emoji ? "bg-[#D97757]" : "bg-white"
+                    }`}
                   style={{
                     shadowColor: "#3A3530",
                     shadowOffset: { width: 0, height: 1 },
@@ -292,9 +295,8 @@ export default function CreateEventScreen() {
                       setCustomCategoryLabel("");
                     }
                   }}
-                  className={`flex-row items-center px-4 py-3 rounded-full ${
-                    selectedCategory === category.id && !customCategoryLabel ? "bg-[#D97757]" : "bg-white"
-                  }`}
+                  className={`flex-row items-center px-4 py-3 rounded-full ${selectedCategory === category.id && !customCategoryLabel ? "bg-[#D97757]" : "bg-white"
+                    }`}
                   style={{
                     shadowColor: "#3A3530",
                     shadowOffset: { width: 0, height: 1 },
@@ -312,11 +314,10 @@ export default function CreateEventScreen() {
                     }
                   />
                   <Text
-                    className={`ml-2 text-[14px] ${
-                      selectedCategory === category.id && !customCategoryLabel
-                        ? "text-[#FAF8F5]"
-                        : "text-[#3A3530]"
-                    }`}
+                    className={`ml-2 text-[14px] ${selectedCategory === category.id && !customCategoryLabel
+                      ? "text-[#FAF8F5]"
+                      : "text-[#3A3530]"
+                      }`}
                     style={{ fontWeight: "500" }}
                   >
                     {category.label}
@@ -365,7 +366,7 @@ export default function CreateEventScreen() {
 
             {/* Date Display Button */}
             <Pressable
-              onPress={() => setShowDatePicker(true)}
+              onPress={handlePickerOpen}
               className="bg-white rounded-2xl px-5 py-4 flex-row items-center justify-between mb-3"
               style={{
                 shadowColor: "#3A3530",
@@ -380,47 +381,81 @@ export default function CreateEventScreen() {
                   {formatDateDisplay(selectedDate)}
                 </Text>
                 <Text className="text-[#9B8F7F] text-[13px]" style={{ fontWeight: "400" }}>
-                  {daysUntil === 0 ? "今天" : daysUntil > 0 ? `${daysUntil} 天后` : `${Math.abs(daysUntil)} 天前`}
+                  {formatTimeRemaining(timeUntil)}
                 </Text>
               </View>
               <SymbolView name="calendar" size={24} type="hierarchical" tintColor="#D97757" />
             </Pressable>
 
-            {/* iOS: Modal picker, Android: Dialog picker */}
-            {showDatePicker && (
-              <>
-                {Platform.OS === "ios" && (
-                  <View className="bg-white rounded-2xl overflow-hidden" style={{ shadowOpacity: 0.03 }}>
-                    <DateTimePicker
-                      value={selectedDate}
-                      mode="date"
-                      display="spinner"
-                      onChange={handleDateChange}
-                      locale="zh-CN"
-                      textColor="#3A3530"
-                    />
-                    <View className="flex-row p-4 border-t border-[#E8E3DB]">
-                      <Pressable
-                        onPress={() => setShowDatePicker(false)}
-                        className="flex-1 py-3 rounded-xl items-center mr-2 bg-[#F5F1EB]"
-                      >
-                        <Text className="text-[#9B8F7F] text-[15px]" style={{ fontWeight: "600" }}>
-                          完成
+            {/* iOS: Bottom Modal, Android: Native Dialog */}
+            {Platform.OS === "ios" && (
+              <Modal
+                visible={showDatePicker}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setShowDatePicker(false)}
+              >
+                <Pressable
+                  className="flex-1 bg-black/30 justify-end"
+                  onPress={() => setShowDatePicker(false)}
+                >
+                  <Pressable onPress={(e) => e.stopPropagation()}>
+                    <View className="bg-white rounded-t-3xl overflow-hidden">
+                      {/* Picker Title */}
+                      <View className="py-4 border-b border-[#E8E3DB]">
+                        <Text className="text-center text-[#3A3530] text-[17px]" style={{ fontWeight: "600" }}>
+                          {pickerMode === "date" ? "选择日期" : "选择时间"}
                         </Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                )}
+                      </View>
 
-                {Platform.OS === "android" && (
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="default"
-                    onChange={handleDateChange}
-                  />
-                )}
-              </>
+                      <DateTimePicker
+                        value={selectedDate}
+                        mode={pickerMode}
+                        display="spinner"
+                        onChange={handleDateChange}
+                        locale="zh-CN"
+                        textColor="#3A3530"
+                      />
+
+                      <View className="flex-row gap-3 p-6 border-t border-[#E8E3DB]" style={{ paddingBottom: 34 }}>
+                        {pickerMode === "time" && (
+                          <Pressable
+                            onPress={() => setPickerMode("date")}
+                            className="flex-1 py-4 rounded-2xl items-center bg-[#E8E3DB] active:opacity-80"
+                          >
+                            <Text className="text-[#9B8F7F] text-[15px]" style={{ fontWeight: "600" }}>
+                              返回
+                            </Text>
+                          </Pressable>
+                        )}
+                        <Pressable
+                          onPress={handlePickerDone}
+                          className="flex-1 py-4 rounded-2xl items-center bg-[#D97757] active:opacity-90"
+                          style={{
+                            shadowColor: "#D97757",
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 12,
+                          }}
+                        >
+                          <Text className="text-white text-[17px]" style={{ fontWeight: "600" }}>
+                            {pickerMode === "date" ? "下一步" : "完成"}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </Pressable>
+                </Pressable>
+              </Modal>
+            )}
+
+            {Platform.OS === "android" && showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode={pickerMode}
+                display="default"
+                onChange={handleDateChange}
+              />
             )}
           </View>
 

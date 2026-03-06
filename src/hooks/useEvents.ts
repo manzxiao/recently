@@ -1,22 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Event, CreateEventInput, UpdateEventInput } from "../types/event";
+import { updateWidgetData } from "../services/widget-sync";
 
 const STORAGE_KEY = "@recently_events";
 
 // Sort events: upcoming first (nearest first), then past (most recent first)
 function sortEvents(events: Event[]): Event[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
 
   return events.sort((a, b) => {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
-    dateA.setHours(0, 0, 0, 0);
-    dateB.setHours(0, 0, 0, 0);
 
-    const isAPast = dateA < today;
-    const isBPast = dateB < today;
+    const isAPast = dateA < now;
+    const isBPast = dateB < now;
 
     // Both are future events - sort by nearest first
     if (!isAPast && !isBPast) {
@@ -47,7 +45,11 @@ export function useEvents() {
       if (data) {
         const parsed = JSON.parse(data);
         setEvents(sortEvents(parsed));
+      } else {
+        setEvents([]);
       }
+      // Update widget data on load
+      await updateWidgetData();
     } catch (err) {
       setError("Failed to load events");
       console.error("Load events error:", err);
@@ -61,6 +63,8 @@ export function useEvents() {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newEvents));
       setEvents(newEvents);
+      // Update widget data
+      await updateWidgetData();
     } catch (err) {
       setError("Failed to save events");
       console.error("Save events error:", err);
@@ -78,7 +82,11 @@ export function useEvents() {
           createdAt: new Date().toISOString(),
         };
 
-        const newEvents = [...events, newEvent];
+        // Read latest data from AsyncStorage to avoid stale state
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        const currentEvents = data ? JSON.parse(data) : [];
+
+        const newEvents = [...currentEvents, newEvent];
         await saveEvents(sortEvents(newEvents));
         return newEvent;
       } catch (err) {
@@ -86,14 +94,18 @@ export function useEvents() {
         throw err;
       }
     },
-    [events, saveEvents]
+    [saveEvents]
   );
 
   // Update an event
   const updateEvent = useCallback(
     async (input: UpdateEventInput) => {
       try {
-        const newEvents = events.map((event) =>
+        // Read latest data from AsyncStorage to avoid stale state
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        const currentEvents = data ? JSON.parse(data) : [];
+
+        const newEvents = currentEvents.map((event: Event) =>
           event.id === input.id ? { ...event, ...input } : event
         );
         await saveEvents(sortEvents(newEvents));
@@ -102,21 +114,25 @@ export function useEvents() {
         throw err;
       }
     },
-    [events, saveEvents]
+    [saveEvents]
   );
 
   // Delete an event
   const deleteEvent = useCallback(
     async (id: string) => {
       try {
-        const newEvents = events.filter((event) => event.id !== id);
+        // Read latest data from AsyncStorage to avoid stale state
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        const currentEvents = data ? JSON.parse(data) : [];
+
+        const newEvents = currentEvents.filter((event: Event) => event.id !== id);
         await saveEvents(newEvents);
       } catch (err) {
         console.error("Delete event error:", err);
         throw err;
       }
     },
-    [events, saveEvents]
+    [saveEvents]
   );
 
   // Clear all events (for testing/debugging)
@@ -124,6 +140,8 @@ export function useEvents() {
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
       setEvents([]);
+      // Update widget data
+      await updateWidgetData();
     } catch (err) {
       console.error("Clear events error:", err);
       throw err;

@@ -5,13 +5,45 @@ import { useEvents } from "../../hooks/useEvents";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 
-function getDaysUntil(targetDateStr: string): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+// Calculate time until
+function getTimeUntil(targetDateStr: string): { days: number; hours: number; minutes: number; isPast: boolean } {
+  const now = new Date();
   const target = new Date(targetDateStr);
-  target.setHours(0, 0, 0, 0);
-  const diffTime = target.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffMs = target.getTime() - now.getTime();
+  const isPast = diffMs < 0;
+  const absDiffMs = Math.abs(diffMs);
+
+  const days = Math.floor(absDiffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((absDiffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  return { days, hours, minutes, isPast };
+}
+
+// Format time for large display
+function formatTimeDisplay(timeUntil: ReturnType<typeof getTimeUntil>): string {
+  const { days, hours, minutes } = timeUntil;
+
+  if (days >= 1) {
+    return days.toString();
+  } else if (hours >= 1) {
+    return `${hours}:${String(minutes).padStart(2, "0")}`;
+  } else {
+    return minutes.toString();
+  }
+}
+
+// Format time unit
+function formatTimeUnit(timeUntil: ReturnType<typeof getTimeUntil>, isPast: boolean): string {
+  const { days, hours } = timeUntil;
+
+  if (days >= 1) {
+    return isPast ? "天前" : "天";
+  } else if (hours >= 1) {
+    return isPast ? "小时前" : "小时";
+  } else {
+    return isPast ? "分钟前" : "分钟";
+  }
 }
 
 function formatDate(dateStr: string): string {
@@ -83,8 +115,8 @@ export default function EventsScreen() {
           </View>
         ) : (
           events.map((event) => {
-            const daysUntil = getDaysUntil(event.date);
-            const isPast = daysUntil < 0;
+            const timeUntil = getTimeUntil(event.date);
+            const { isPast } = timeUntil;
 
             return (
               <View key={event.id} className="mb-4">
@@ -98,19 +130,19 @@ export default function EventsScreen() {
                     elevation: 2,
                   }}
                 >
-                  {/* Days Counter */}
+                  {/* Time Counter */}
                   <View className="flex-row items-baseline mb-3">
                     <Text
                       className={`${isPast ? "text-[#C4B5A3]" : "text-[#D97757]"} text-[56px] tracking-tighter`}
                       style={{ fontWeight: "200", letterSpacing: -2 }}
                     >
-                      {Math.abs(daysUntil)}
+                      {formatTimeDisplay(timeUntil)}
                     </Text>
                     <Text
                       className={`${isPast ? "text-[#C4B5A3]" : "text-[#9B8F7F]"} text-[16px] ml-2 flex-1`}
                       style={{ fontWeight: "400" }}
                     >
-                      {isPast ? "天前" : "天"}
+                      {formatTimeUnit(timeUntil, isPast)}
                     </Text>
 
                     {/* Delete Button */}

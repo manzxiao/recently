@@ -26,27 +26,32 @@ export default function ProfileScreen() {
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
 
-    let nearestDays = 0;
+    let nearestDays: number | null = null;
     let pastCount = 0;
 
     events.forEach((event) => {
       const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      const diffDays = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const diffMs = eventDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-      if (diffDays < 0) {
+      if (diffMs < 0) {
         pastCount++;
-      } else if (nearestDays === 0 || diffDays < nearestDays) {
-        nearestDays = diffDays;
+      } else {
+        if (nearestDays === null || diffDays < nearestDays) {
+          nearestDays = diffDays;
+        }
       }
     });
 
     return [
       { label: "已创建", value: events.length.toString(), unit: "个事件" },
-      { label: "最近的", value: nearestDays > 0 ? nearestDays.toString() : "-", unit: nearestDays > 0 ? "天后" : "" },
+      {
+        label: "最近的",
+        value: nearestDays !== null ? (nearestDays === 0 ? "<1" : nearestDays.toString()) : "-",
+        unit: nearestDays !== null && nearestDays >= 0 ? "天后" : ""
+      },
       { label: "已过去", value: pastCount.toString(), unit: "个" },
     ];
   }, [events]);

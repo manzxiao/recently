@@ -41,7 +41,28 @@
       ],
       "expo-background-task",
       "@react-native-community/datetimepicker",
-      "expo-widgets"
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.manzxiao.recently.widgets",
+          "groupIdentifier": "group.com.manzxiao.recently",
+          "widgets": [
+            {
+              "name": "EventWidget",
+              "displayName": "时光簿",
+              "description": "显示最近即将到来的事件",
+              "supportedFamilies": [
+                "systemSmall",
+                "systemMedium",
+                "systemLarge",
+                "accessoryInline",
+                "accessoryRectangular",
+                "accessoryCircular"
+              ]
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
