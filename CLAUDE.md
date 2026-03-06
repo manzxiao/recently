@@ -12,6 +12,7 @@
 ## 🛠 Tech Stack
 
 ### Core Framework
+
 - **Expo SDK**: 55.0.5
 - **React**: 19.2.0
 - **React Native**: 0.83.2
@@ -19,14 +20,16 @@
 - **Expo Router**: File-based routing with typed routes
 
 ### Styling
+
 - **NativeWind**: 4.2.2 (stable) - Tailwind CSS for React Native
 - **Tailwind CSS**: 3.4.17
 - **Utility Libraries**: clsx, tailwind-merge
 
 ### Key Libraries
+
 - **Navigation**:
   - Expo Router (file-based)
-  - @react-navigation/* (底层导航)
+  - @react-navigation/\* (底层导航)
 - **Animations**: react-native-reanimated 4.2.1
 - **Images**: expo-image
 - **Icons**: expo-symbols (SF Symbols)
@@ -34,6 +37,7 @@
 - **Glass Effect**: expo-glass-effect
 
 ### Development Tools
+
 - **React Compiler**: Enabled (experimental)
 - **Typed Routes**: Enabled
 - **Dev Client**: expo-dev-client
@@ -70,7 +74,7 @@ recently/
 ### ✅ 核心原则
 
 1. **直接使用 React Native 组件** - 不需要包装组件
-2. **所有 Tailwind 类都能正常工作** - 包括 text-*, bg-*, p-*, m-* 等
+2. **所有 Tailwind 类都能正常工作** - 包括 text-_, bg-_, p-_, m-_ 等
 3. **使用 className prop** - 就像在 Web 上使用 Tailwind 一样
 
 ### 基础用法
@@ -83,27 +87,18 @@ export default function MyScreen() {
   return (
     <View className="flex-1 bg-white p-4">
       {/* 标题 - 所有 text-* 类都能用 */}
-      <Text className="text-2xl font-bold text-gray-900 mb-4">
-        Title
-      </Text>
+      <Text className="text-2xl font-bold text-gray-900 mb-4">Title</Text>
 
       {/* 副标题 */}
-      <Text className="text-base text-gray-600 mb-4">
-        Description text
-      </Text>
+      <Text className="text-base text-gray-600 mb-4">Description text</Text>
 
       {/* 按钮 */}
       <Pressable className="bg-blue-500 active:bg-blue-700 px-6 py-3 rounded-lg">
-        <Text className="text-white text-center font-semibold">
-          Press Me
-        </Text>
+        <Text className="text-white text-center font-semibold">Press Me</Text>
       </Pressable>
 
       {/* 图片 */}
-      <Image
-        className="w-full h-48 rounded-lg mt-4"
-        source={{ uri: "https://example.com/image.jpg" }}
-      />
+      <Image className="w-full h-48 rounded-lg mt-4" source={{ uri: "https://example.com/image.jpg" }} />
     </View>
   );
 }
@@ -111,19 +106,19 @@ export default function MyScreen() {
 
 ### 支持的 Tailwind 类
 
-| 类别 | 示例 | 状态 |
-|------|------|------|
-| 布局 | `flex-1`, `flex-row`, `items-center`, `justify-between` | ✅ |
-| 间距 | `p-4`, `m-2`, `px-6`, `py-3`, `gap-4` | ✅ |
-| 背景色 | `bg-blue-500`, `bg-red-600`, `bg-white` | ✅ |
-| 文字颜色 | `text-gray-900`, `text-blue-500`, `text-white` | ✅ |
-| 字体大小 | `text-xs`, `text-sm`, `text-base`, `text-xl`, `text-2xl` | ✅ |
-| 字体粗细 | `font-bold`, `font-semibold`, `font-medium` | ✅ |
-| 文字对齐 | `text-center`, `text-left`, `text-right` | ✅ |
-| 圆角 | `rounded`, `rounded-lg`, `rounded-full` | ✅ |
-| 边框 | `border`, `border-2`, `border-gray-300` | ✅ |
-| 阴影 | `shadow`, `shadow-lg` | ✅ (iOS only) |
-| 交互状态 | `active:bg-blue-700`, `active:opacity-80` | ✅ |
+| 类别     | 示例                                                     | 状态          |
+| -------- | -------------------------------------------------------- | ------------- |
+| 布局     | `flex-1`, `flex-row`, `items-center`, `justify-between`  | ✅            |
+| 间距     | `p-4`, `m-2`, `px-6`, `py-3`, `gap-4`                    | ✅            |
+| 背景色   | `bg-blue-500`, `bg-red-600`, `bg-white`                  | ✅            |
+| 文字颜色 | `text-gray-900`, `text-blue-500`, `text-white`           | ✅            |
+| 字体大小 | `text-xs`, `text-sm`, `text-base`, `text-xl`, `text-2xl` | ✅            |
+| 字体粗细 | `font-bold`, `font-semibold`, `font-medium`              | ✅            |
+| 文字对齐 | `text-center`, `text-left`, `text-right`                 | ✅            |
+| 圆角     | `rounded`, `rounded-lg`, `rounded-full`                  | ✅            |
+| 边框     | `border`, `border-2`, `border-gray-300`                  | ✅            |
+| 阴影     | `shadow`, `shadow-lg`                                    | ✅ (iOS only) |
+| 交互状态 | `active:bg-blue-700`, `active:opacity-80`                | ✅            |
 
 ### ScrollView 注意事项
 
@@ -154,9 +149,9 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#eff6ff',
-          500: '#3b82f6',
-          900: '#1e3a8a',
+          50: "#eff6ff",
+          500: "#3b82f6",
+          900: "#1e3a8a",
         },
       },
     },
@@ -296,7 +291,7 @@ interface ComponentProps {
 }
 
 // 3. Component
-export default function Component({ }: ComponentProps) {
+export default function Component({}: ComponentProps) {
   // 3.1 Hooks
   const [state, setState] = useState();
 
@@ -304,11 +299,7 @@ export default function Component({ }: ComponentProps) {
   const handlePress = () => {};
 
   // 3.3 Render
-  return (
-    <View>
-      {/* JSX */}
-    </View>
-  );
+  return <View>{/* JSX */}</View>;
 }
 ```
 
@@ -351,18 +342,6 @@ eas update --branch production --message "Bug fixes"
 # 1. 清除所有缓存
 npx expo start --clear
 
-# 2. 删除并重新安装依赖
-rm -rf node_modules .expo
-npm install
-
-# 3. 检查 Metro bundler 是否正常编译 CSS
-```
-
-### TypeScript 错误
-
-```bash
-# 重新生成类型
-npx expo customize tsconfig.json
 ```
 
 ### Metro bundler 错误
@@ -371,16 +350,6 @@ npx expo customize tsconfig.json
 # 重启 Metro
 pkill -f "metro"
 npm start
-```
-
-### iOS/Android 构建错误
-
-```bash
-# iOS - 清除 pod 缓存
-cd ios && pod install && cd ..
-
-# Android - 清理构建
-cd android && ./gradlew clean && cd ..
 ```
 
 ## 📦 Important Files
@@ -405,7 +374,7 @@ API_URL=https://api.example.com
 在代码中使用：
 
 ```tsx
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 ```
@@ -426,15 +395,12 @@ const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 ## 📚 Resources
 
 ### Documentation
+
 - [Expo Documentation](https://docs.expo.dev/)
 - [Expo Router](https://docs.expo.dev/router/introduction/)
 - [NativeWind v4](https://www.nativewind.dev/docs)
 - [Tailwind CSS v3](https://v3.tailwindcss.com/)
 - [React Native](https://reactnative.dev/)
-
-### Examples
-- 查看 `src/app/examples.tsx` 获取完整的 Tailwind 样式示例
-- 查看 `NATIVEWIND_V4_GUIDE.md` 获取详细的 NativeWind 使用指南
 
 ## 🚨 Critical Rules
 
@@ -442,25 +408,5 @@ const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 2. **使用 npx expo install** 安装新包 - 确保版本兼容性
 3. **提交前测试多个平台** - iOS、Android、Web 可能有差异
 4. **使用 Tailwind className** - 避免内联样式
-5. **遵循 Expo Router 文件规范** - _layout.tsx, +html.tsx 等有特殊含义
+5. **遵循 Expo Router 文件规范** - \_layout.tsx, +html.tsx 等有特殊含义
 6. **清除缓存是万能药** - 遇到问题先 `npx expo start --clear`
-
-## 🔄 Recent Changes
-
-### 2024-03 - NativeWind v4 Migration
-- ✅ 从 NativeWind v5 (preview) 迁移到 v4 (stable)
-- ✅ 所有 text-* Tailwind 类现在都能正常工作
-- ✅ 移除了 react-native-css 依赖
-- ✅ 添加了完整的样式示例页面
-
-## 👤 Project Owner
-
-- **GitHub**: [@manzxiao](https://github.com/manzxiao)
-- **Repository**: https://github.com/manzxiao/recently.git
-
----
-
-**Last Updated**: 2024-03-06
-**Expo SDK**: 55.0.5
-**NativeWind**: 4.2.2
-**React Native**: 0.83.2
