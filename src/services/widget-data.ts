@@ -17,8 +17,7 @@ export interface EventWidgetData {
   emoji: string;
   title: string;
   customCategory: string;
-  timeValue: string;
-  timeUnit: string;
+  timeDisplay: string; // 完整的时间显示，如 "3天5小时20分钟" 或 "2小时30分15秒"
   isPast: boolean;
 }
 
@@ -27,13 +26,18 @@ const EMPTY_EVENT: EventWidgetData = {
   emoji: "",
   title: "",
   customCategory: "",
-  timeValue: "",
-  timeUnit: "",
+  timeDisplay: "",
   isPast: false,
 };
 
 // Calculate time until event
-function getTimeUntil(targetDateStr: string): { days: number; hours: number; minutes: number; isPast: boolean } {
+function getTimeUntil(targetDateStr: string): {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  isPast: boolean;
+} {
   const now = new Date();
   const target = new Date(targetDateStr);
   const diffMs = target.getTime() - now.getTime();
@@ -43,33 +47,25 @@ function getTimeUntil(targetDateStr: string): { days: number; hours: number; min
   const days = Math.floor(absDiffMs / (1000 * 60 * 60 * 24));
   const hours = Math.floor((absDiffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((absDiffMs % (1000 * 60)) / 1000);
 
-  return { days, hours, minutes, isPast };
+  return { days, hours, minutes, seconds, isPast };
 }
 
-// Format time display for widget (simplified)
-function formatTimeDisplay(timeUntil: { days: number; hours: number; minutes: number }): string {
+// Format time display: "还有 X天" or "还有 X小时X分钟"
+function formatTimeDisplay(
+  timeUntil: { days: number; hours: number; minutes: number; seconds: number },
+  isPast: boolean,
+): string {
   const { days, hours, minutes } = timeUntil;
+  const prefix = isPast ? "已过去" : "还有";
 
   if (days >= 1) {
-    return days.toString();
-  } else if (hours >= 1) {
-    return hours.toString();
+    // 大于天：只显示天数
+    return `${prefix} ${days}天`;
   } else {
-    return minutes.toString();
-  }
-}
-
-// Format time unit for widget
-function formatTimeUnit(timeUntil: { days: number; hours: number }, isPast: boolean): string {
-  const { days, hours } = timeUntil;
-
-  if (days >= 1) {
-    return isPast ? "天前" : "天后";
-  } else if (hours >= 1) {
-    return isPast ? "小时前" : "小时后";
-  } else {
-    return isPast ? "分钟前" : "分钟后";
+    // 小于天：显示小时和分钟
+    return `${prefix} ${hours}:${minutes}`;
   }
 }
 
@@ -105,8 +101,7 @@ export async function selectNextEvent(): Promise<EventWidgetData> {
       emoji: event.emoji,
       title: event.title,
       customCategory: event.customCategory || "",
-      timeValue: formatTimeDisplay(timeUntil),
-      timeUnit: formatTimeUnit(timeUntil, timeUntil.isPast),
+      timeDisplay: formatTimeDisplay(timeUntil, timeUntil.isPast),
       isPast: timeUntil.isPast,
     };
   } catch (error) {
