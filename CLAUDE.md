@@ -159,6 +159,337 @@ module.exports = {
 };
 ```
 
+## 🎨 Design System - "时光簿"设计规范
+
+**审美方向**: 日式极简主义 + 温暖优雅
+
+### ⚠️ **重要：所有新增功能必须严格遵循此设计系统**
+
+后续添加任何新页面、组件或功能时，必须保持与现有设计风格的一致性。这不是可选的建议，而是强制性要求。
+
+### 🎨 配色方案
+
+**主色调**：温暖米色系 + 柔和橙色强调
+
+```tsx
+// 背景色
+bg-[#FAF8F5]       // 主背景 - 温暖的米白色
+bg-white           // 卡片背景 - 纯白
+
+// 文字颜色
+text-[#3A3530]     // 主文字 - 深棕色
+text-[#9B8F7F]     // 次要文字 - 中等棕灰
+text-[#C4B5A3]     // 辅助文字 - 浅棕灰
+text-[#D4C4B0]     // 最浅文字 - 装饰性
+
+// 强调色
+text-[#D97757]     // 强调色 - 柔和橙色（用于重要数字、选中状态）
+bg-[#D97757]       // 按钮、高亮
+
+// 分隔线和边框
+border-[#E8E3DB]   // 边框、分隔线
+bg-[#E8E3DB]       // 次要按钮背景
+```
+
+**❌ 禁止使用**：
+- 鲜艳的纯色（蓝色、绿色、紫色等）
+- 高饱和度的颜色
+- 纯黑 (#000) 或纯灰 (#888)
+
+### 📐 排版系统
+
+**标题层级**：
+
+```tsx
+// 页面主标题（超大、超细）
+text-[42px]        // 字号
+fontWeight: "300"  // 超细字重
+letterSpacing: -1  // 紧凑间距
+
+// 卡片内大数字（强调剩余天数）
+text-[56px]        // 字号
+fontWeight: "200"  // 极细字重
+letterSpacing: -2  // 非常紧凑
+
+// 事件标题
+text-[22px]        // 字号
+fontWeight: "500"  // 中等字重
+
+// 正文
+text-[15px] / text-[14px]
+fontWeight: "400"  // 常规字重
+
+// 小标签
+text-[13px] / text-[11px]
+fontWeight: "400" / "500"
+letterSpacing: 0.5 / 2  // 稍宽松
+```
+
+**关键原则**：
+- ✅ 大标题使用超细字重（200-300），营造轻盈感
+- ✅ 数字使用极细字重 + 负字间距，增强视觉冲击
+- ✅ 正文保持 400 字重的可读性
+- ❌ 避免使用 bold (700) 或更粗的字重
+
+### 📦 间距系统
+
+**内边距 (Padding)**：
+
+```tsx
+px-6   // 页面左右边距（24px）
+py-4   // 卡片垂直内边距
+p-6    // 卡片内边距
+
+pt-8   // 区块顶部间距
+pb-8   // 区块底部间距
+```
+
+**外边距 (Margin)**：
+
+```tsx
+mb-4   // 卡片之间间距
+mb-2   // 文本行间距
+mb-3   // 小区块间距
+mt-2   // 顶部小间距
+```
+
+**安全区域**：
+
+```tsx
+// 总是使用 useSafeAreaInsets hook
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const insets = useSafeAreaInsets();
+style={{ paddingTop: insets.top + 20 }}  // 顶部安全区域 + 额外 20px
+```
+
+### 🔘 圆角系统
+
+```tsx
+rounded-3xl   // 大卡片 (24px) - 主要容器
+rounded-2xl   // 中等元素 (16px) - 输入框、按钮
+rounded-full  // 圆形元素 - 头像、图标容器
+```
+
+**规则**：
+- ✅ 卡片统一使用 `rounded-3xl`
+- ✅ 按钮、输入框使用 `rounded-2xl`
+- ❌ 不要使用 `rounded-lg` 或更小的圆角
+
+### 🌑 阴影系统
+
+**微妙的阴影**（用于卡片）：
+
+```tsx
+style={{
+  shadowColor: "#3A3530",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.04,  // 非常轻微
+  shadowRadius: 12,
+  elevation: 2,         // Android
+}}
+```
+
+**中等阴影**（用于主按钮）：
+
+```tsx
+style={{
+  shadowColor: "#D97757",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 12,
+  elevation: 4,
+}}
+```
+
+**规则**：
+- ✅ 阴影必须非常轻微，不抢眼
+- ✅ 卡片使用 0.04 透明度
+- ❌ 禁止使用深色或明显的阴影
+
+### 🎭 交互状态
+
+**按压效果**：
+
+```tsx
+// 简单的透明度变化
+className="active:opacity-80"
+
+// 或背景色微调
+className="active:bg-blue-700"  // 仅当有强调色按钮时
+```
+
+**SF Symbols 动画**：
+
+```tsx
+<SymbolView
+  name="calendar"
+  size={24}
+  type="hierarchical"
+  tintColor={color}
+  animationSpec={{
+    effect: {
+      type: focused ? "pulse" : "bounce",
+    },
+  }}
+/>
+```
+
+### 🧩 组件样式规范
+
+#### Tab Bar
+
+```tsx
+tabBarStyle: {
+  backgroundColor: "#FAF8F5",  // 与主背景一致
+  borderTopWidth: 1,
+  borderTopColor: "#E8E3DB",   // 细微分隔线
+  height: 88,
+  paddingTop: 8,
+  paddingBottom: 34,           // 适配 iPhone Home Indicator
+},
+tabBarActiveTintColor: "#D97757",    // 选中：橙色
+tabBarInactiveTintColor: "#9B8F7F",  // 未选中：棕灰
+```
+
+#### 输入框
+
+```tsx
+<TextInput
+  className="bg-white rounded-2xl px-5 py-4 text-[#3A3530] text-[17px]"
+  placeholderTextColor="#C4B5A3"
+  style={{
+    fontWeight: "400",
+    shadowColor: "#3A3530",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+  }}
+/>
+```
+
+#### 主按钮
+
+```tsx
+<Pressable
+  className="bg-[#D97757] rounded-2xl py-5 items-center active:opacity-90"
+  style={{
+    shadowColor: "#D97757",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+  }}
+>
+  <Text className="text-white text-[17px]" style={{ fontWeight: "600" }}>
+    创建记忆
+  </Text>
+</Pressable>
+```
+
+#### 次要按钮
+
+```tsx
+<Pressable
+  className="bg-[#E8E3DB] rounded-full px-4 py-3"
+  style={{ shadowOpacity: 0.03 }}
+>
+  <Text className="text-[#3A3530] text-[14px]" style={{ fontWeight: "500" }}>
+    类别
+  </Text>
+</Pressable>
+```
+
+### 📋 布局规范
+
+**页面结构**：
+
+```tsx
+<View className="flex-1 bg-[#FAF8F5]">
+  {/* Header - 总是使用安全区域 */}
+  <View style={{ paddingTop: insets.top + 20 }} className="px-6 pb-8">
+    <Text className="text-[#3A3530] text-[42px]" style={{ fontWeight: "300" }}>
+      标题
+    </Text>
+  </View>
+
+  {/* Content - 可滚动 */}
+  <ScrollView className="flex-1 px-6">
+    {/* 内容 */}
+  </ScrollView>
+</View>
+```
+
+**卡片结构**：
+
+```tsx
+<Pressable
+  className="mb-4 bg-white rounded-3xl p-6 active:opacity-80"
+  style={{ /* 阴影样式 */ }}
+>
+  {/* 垂直布局，信息从上到下 */}
+</Pressable>
+```
+
+### 🎯 图标使用
+
+**使用 SF Symbols**（expo-symbols）：
+
+```tsx
+import { SymbolView } from "expo-symbols";
+
+<SymbolView
+  name="calendar"           // SF Symbol 名称
+  size={24}                 // 统一尺寸：24 或 16
+  type="hierarchical"       // 统一使用 hierarchical
+  tintColor={color}         // 使用设计系统颜色
+/>
+```
+
+**常用图标**：
+- `calendar` - 事件/日历
+- `plus.circle` - 创建
+- `person.circle` - 个人
+- `gift` - 生日
+- `pencil` - 编辑/考试
+- `heart` - 纪念日
+- `star` - 其他/收藏
+
+### ❌ 禁止事项
+
+1. **禁止偏离配色方案**：不要引入新的颜色，必须使用定义的色值
+2. **禁止使用粗字重**：标题最多 500，不要用 600-900
+3. **禁止小圆角**：统一 `rounded-2xl` 或 `rounded-3xl`
+4. **禁止深色阴影**：阴影透明度不超过 0.3
+5. **禁止鲜艳颜色**：保持温暖、柔和的色调
+6. **禁止复杂布局**：保持简洁、垂直布局优先
+7. **禁止跳过安全区域**：总是使用 `useSafeAreaInsets`
+
+### ✅ 开发检查清单
+
+新增功能时，必须检查：
+
+- [ ] 使用 `bg-[#FAF8F5]` 作为页面背景
+- [ ] 标题使用 `text-[42px]` + `fontWeight: "300"`
+- [ ] 强调色使用 `#D97757`（橙色）
+- [ ] 卡片使用 `rounded-3xl` + 微妙阴影
+- [ ] 按钮使用 `rounded-2xl`
+- [ ] 文字颜色在定义的色阶中（`#3A3530` / `#9B8F7F` / `#C4B5A3`）
+- [ ] 使用 SF Symbols 图标（`expo-symbols`）
+- [ ] 添加了安全区域处理（`useSafeAreaInsets`）
+- [ ] 交互状态使用 `active:opacity-80`
+- [ ] 间距使用定义的系统（`px-6`, `mb-4` 等）
+
+### 📖 参考实现
+
+查看以下文件了解标准实现：
+
+- `src/app/(tabs)/index.tsx` - 列表页面
+- `src/app/(tabs)/create.tsx` - 表单页面
+- `src/app/(tabs)/profile.tsx` - 个人信息页面
+- `src/app/(tabs)/_layout.tsx` - Tab 导航
+
+**记住**：一致性 > 创新。保持设计语言统一比引入新想法更重要。
+
 ## 🚀 Development Workflow
 
 ### 启动开发服务器
