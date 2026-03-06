@@ -47,29 +47,29 @@ function getTimeUntil(targetDateStr: string): { days: number; hours: number; min
   return { days, hours, minutes, isPast };
 }
 
-// Format time display
+// Format time display for widget (simplified)
 function formatTimeDisplay(timeUntil: { days: number; hours: number; minutes: number }): string {
   const { days, hours, minutes } = timeUntil;
 
   if (days >= 1) {
     return days.toString();
   } else if (hours >= 1) {
-    return `${hours}:${String(minutes).padStart(2, "0")}`;
+    return hours.toString();
   } else {
     return minutes.toString();
   }
 }
 
-// Format time unit
+// Format time unit for widget
 function formatTimeUnit(timeUntil: { days: number; hours: number }, isPast: boolean): string {
   const { days, hours } = timeUntil;
 
   if (days >= 1) {
-    return isPast ? "天前" : "天";
+    return isPast ? "天前" : "天后";
   } else if (hours >= 1) {
-    return isPast ? "小时前" : "小时";
+    return isPast ? "小时前" : "小时后";
   } else {
-    return isPast ? "分钟前" : "分钟";
+    return isPast ? "分钟前" : "分钟后";
   }
 }
 

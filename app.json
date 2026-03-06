@@ -44,8 +44,6 @@
       [
         "expo-widgets",
         {
-          "bundleIdentifier": "com.manzxiao.recently.widgets",
-          "groupIdentifier": "group.com.manzxiao.recently",
           "widgets": [
             {
               "name": "EventWidget",
@@ -54,10 +52,7 @@
               "supportedFamilies": [
                 "systemSmall",
                 "systemMedium",
-                "systemLarge",
-                "accessoryInline",
-                "accessoryRectangular",
-                "accessoryCircular"
+                "systemLarge"
               ]
             }
           ]
