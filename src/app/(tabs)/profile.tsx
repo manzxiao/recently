@@ -1,22 +1,80 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SymbolView } from "expo-symbols";
+import { useEvents } from "../../hooks/useEvents";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useMemo } from "react";
 
 const SETTINGS_OPTIONS = [
   { id: "notifications", label: "通知设置", icon: "bell", color: "#D97757" },
   { id: "theme", label: "主题外观", icon: "paintbrush", color: "#9B8F7F" },
   { id: "backup", label: "备份与恢复", icon: "arrow.clockwise", color: "#7BA897" },
+  { id: "clear", label: "清除所有数据", icon: "trash", color: "#E85D75" },
   { id: "about", label: "关于", icon: "info.circle", color: "#6B9BD1" },
-];
-
-const STATS = [
-  { label: "已创建", value: "3", unit: "个事件" },
-  { label: "最近的", value: "92", unit: "天后" },
-  { label: "已过去", value: "0", unit: "个" },
 ];
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { events, clearAllEvents, refreshEvents } = useEvents();
+
+  // Refresh on focus
+  useFocusEffect(
+    useCallback(() => {
+      refreshEvents();
+    }, [refreshEvents])
+  );
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let nearestDays = 0;
+    let pastCount = 0;
+
+    events.forEach((event) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      const diffDays = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        pastCount++;
+      } else if (nearestDays === 0 || diffDays < nearestDays) {
+        nearestDays = diffDays;
+      }
+    });
+
+    return [
+      { label: "已创建", value: events.length.toString(), unit: "个事件" },
+      { label: "最近的", value: nearestDays > 0 ? nearestDays.toString() : "-", unit: nearestDays > 0 ? "天后" : "" },
+      { label: "已过去", value: pastCount.toString(), unit: "个" },
+    ];
+  }, [events]);
+
+  const handleSettingPress = useCallback(
+    (id: string) => {
+      if (id === "clear") {
+        Alert.alert("清除所有数据", "此操作将删除所有事件，且无法恢复。确定要继续吗？", [
+          { text: "取消", style: "cancel" },
+          {
+            text: "清除",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await clearAllEvents();
+                Alert.alert("成功", "所有数据已清除");
+              } catch (error) {
+                Alert.alert("错误", "清除失败，请重试");
+              }
+            },
+          },
+        ]);
+      } else {
+        Alert.alert("提示", `"${SETTINGS_OPTIONS.find((o) => o.id === id)?.label}"功能开发中`);
+      }
+    },
+    [clearAllEvents]
+  );
 
   return (
     <View className="flex-1 bg-[#FAF8F5]">
@@ -65,7 +123,7 @@ export default function ProfileScreen() {
 
             {/* Stats */}
             <View className="flex-row w-full mt-6 pt-6 border-t border-[#E8E3DB]">
-              {STATS.map((stat, index) => (
+              {stats.map((stat, index) => (
                 <View key={stat.label} className="flex-1 items-center">
                   {index > 0 && <View className="absolute left-0 w-[1px] h-full bg-[#E8E3DB]" />}
                   <Text
@@ -95,6 +153,7 @@ export default function ProfileScreen() {
           {SETTINGS_OPTIONS.map((option, index) => (
             <Pressable
               key={option.id}
+              onPress={() => handleSettingPress(option.id)}
               className={`flex-row items-center bg-white px-5 py-4 active:opacity-80 ${
                 index === 0 ? "rounded-t-2xl" : ""
               } ${index === SETTINGS_OPTIONS.length - 1 ? "rounded-b-2xl" : ""}`}
