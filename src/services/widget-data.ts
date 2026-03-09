@@ -17,7 +17,10 @@ export interface EventWidgetData {
   emoji: string;
   title: string;
   customCategory: string;
-  timeDisplay: string; // 完整的时间显示，如 "3天5小时20分钟" 或 "2小时30分15秒"
+  timeDisplay: string; // 完整的时间显示，用于描述文字，如 "还有 79 天"
+  countdownNumber: string; // 倒计时数字，如 "79" 或 "14"
+  countdownUnit: string; // 倒计时单位，如 "天后" 或 "小时"
+  dateText: string; // 日期文字，如 "2026年5月1日"
   isPast: boolean;
 }
 
@@ -27,6 +30,9 @@ const EMPTY_EVENT: EventWidgetData = {
   title: "",
   customCategory: "",
   timeDisplay: "",
+  countdownNumber: "",
+  countdownUnit: "",
+  dateText: "",
   isPast: false,
 };
 
@@ -52,21 +58,42 @@ function getTimeUntil(targetDateStr: string): {
   return { days, hours, minutes, seconds, isPast };
 }
 
-// Format time display: "还有 X天" or "还有 X小时X分钟"
-function formatTimeDisplay(
+// Format time for widget display
+function formatTimeForWidget(
   timeUntil: { days: number; hours: number; minutes: number; seconds: number },
   isPast: boolean,
-): string {
+): { display: string; number: string; unit: string } {
   const { days, hours, minutes } = timeUntil;
   const prefix = isPast ? "已过去" : "还有";
 
   if (days >= 1) {
-    // 大于天：只显示天数
-    return `${prefix} ${days}天`;
+    return {
+      display: `${prefix} ${days} 天`,
+      number: String(days),
+      unit: "天后",
+    };
+  } else if (hours >= 1) {
+    return {
+      display: `${prefix} ${hours}:${minutes.toString().padStart(2, '0')}`,
+      number: String(hours),
+      unit: "小时",
+    };
   } else {
-    // 小于天：显示小时和分钟
-    return `${prefix} ${hours}:${minutes}`;
+    return {
+      display: `${prefix} ${minutes} 分钟`,
+      number: String(minutes),
+      unit: "分钟",
+    };
   }
+}
+
+// Format date text: "2026年5月1日"
+function formatDateText(dateStr: string): string {
+  const date = new Date(dateStr);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}年${month}月${day}日`;
 }
 
 /**
@@ -95,13 +122,17 @@ export async function selectNextEvent(): Promise<EventWidgetData> {
 
     const event = upcomingEvents[0];
     const timeUntil = getTimeUntil(event.date);
+    const timeFormatted = formatTimeForWidget(timeUntil, timeUntil.isPast);
 
     return {
       hasEvent: true,
       emoji: event.emoji,
       title: event.title,
       customCategory: event.customCategory || "",
-      timeDisplay: formatTimeDisplay(timeUntil, timeUntil.isPast),
+      timeDisplay: timeFormatted.display,
+      countdownNumber: timeFormatted.number,
+      countdownUnit: timeFormatted.unit,
+      dateText: formatDateText(event.date),
       isPast: timeUntil.isPast,
     };
   } catch (error) {
