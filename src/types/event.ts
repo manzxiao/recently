@@ -8,6 +8,7 @@ export interface Event {
   customCategory?: string; // Custom category label (when category is "other")
   emoji: string;
   createdAt: string; // ISO timestamp
+  isPinned?: boolean; // Priority display on widget
 }
 
 export interface CreateEventInput {
@@ -16,6 +17,7 @@ export interface CreateEventInput {
   category: EventCategory;
   customCategory?: string;
   emoji: string;
+  isPinned?: boolean;
 }
 
 export interface UpdateEventInput extends Partial<CreateEventInput> {

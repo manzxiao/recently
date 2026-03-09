@@ -9,6 +9,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Switch,
   Text,
   TextInput,
   View,
@@ -103,6 +104,7 @@ export default function CreateEventScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
   const [creating, setCreating] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
 
   // Emoji selection states
   const [showAllEmojis, setShowAllEmojis] = useState(false);
@@ -173,6 +175,7 @@ export default function CreateEventScreen() {
         category: selectedCategory,
         customCategory: customCategoryLabel.trim() || undefined,
         emoji: selectedEmoji,
+        isPinned: isPinned,
       });
 
       // Reset form
@@ -181,6 +184,7 @@ export default function CreateEventScreen() {
       setSelectedEmoji("📚");
       setSelectedCategory("exam");
       setCustomCategoryLabel("");
+      setIsPinned(false);
 
       // Show success and navigate to list
       Alert.alert("成功", "事件创建成功！", [
@@ -457,6 +461,42 @@ export default function CreateEventScreen() {
                 onChange={handleDateChange}
               />
             )}
+          </View>
+
+          {/* Pin to Widget Toggle */}
+          <View className="mb-8">
+            <Pressable
+              onPress={() => setIsPinned(!isPinned)}
+              className="bg-white rounded-2xl px-5 py-4 flex-row items-center justify-between"
+              style={{
+                shadowColor: "#3A3530",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: isPinned ? 0.06 : 0.03,
+                shadowRadius: 8,
+                elevation: 1,
+                borderWidth: isPinned ? 1 : 0,
+                borderColor: isPinned ? "#D97757" : "transparent",
+              }}
+            >
+              <View className="flex-1">
+                <View className="flex-row items-center mb-1">
+                  <SymbolView name="pin.fill" size={16} type="hierarchical" tintColor="#D97757" />
+                  <Text className="text-[#3A3530] text-[15px] ml-2" style={{ fontWeight: "600" }}>
+                    置顶到桌面组件
+                  </Text>
+                </View>
+                <Text className="text-[#9B8F7F] text-[13px]" style={{ fontWeight: "400" }}>
+                  优先在 iOS 桌面小组件中显示此事件
+                </Text>
+              </View>
+              <Switch
+                value={isPinned}
+                onValueChange={setIsPinned}
+                trackColor={{ false: "#E8E3DB", true: "#D97757" }}
+                thumbColor="#FFFFFF"
+                ios_backgroundColor="#E8E3DB"
+              />
+            </Pressable>
           </View>
 
           {/* Create Button */}

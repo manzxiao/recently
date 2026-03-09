@@ -10,6 +10,7 @@ export interface Event {
   customCategory?: string;
   emoji: string;
   createdAt: string;
+  isPinned?: boolean; // 是否优先显示在 widget
 }
 
 export interface EventWidgetData {
@@ -98,6 +99,7 @@ function formatDateText(dateStr: string): string {
 
 /**
  * Select the next upcoming event from storage
+ * Priority: 1. Pinned events 2. Nearest upcoming events
  */
 export async function selectNextEvent(): Promise<EventWidgetData> {
   try {
@@ -113,26 +115,39 @@ export async function selectNextEvent(): Promise<EventWidgetData> {
       return eventDate >= now;
     });
 
-    // Sort by nearest first
-    upcomingEvents.sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
-
     if (upcomingEvents.length === 0) return EMPTY_EVENT;
 
-    const event = upcomingEvents[0];
-    const timeUntil = getTimeUntil(event.date);
+    // Check for pinned events first
+    const pinnedEvents = upcomingEvents.filter((event) => event.isPinned === true);
+
+    let selectedEvent: Event;
+
+    if (pinnedEvents.length > 0) {
+      // If there are pinned events, select the nearest pinned event
+      pinnedEvents.sort((a, b) => {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      });
+      selectedEvent = pinnedEvents[0];
+    } else {
+      // Otherwise, select the nearest upcoming event
+      upcomingEvents.sort((a, b) => {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      });
+      selectedEvent = upcomingEvents[0];
+    }
+
+    const timeUntil = getTimeUntil(selectedEvent.date);
     const timeFormatted = formatTimeForWidget(timeUntil, timeUntil.isPast);
 
     return {
       hasEvent: true,
-      emoji: event.emoji,
-      title: event.title,
-      customCategory: event.customCategory || "",
+      emoji: selectedEvent.emoji,
+      title: selectedEvent.title,
+      customCategory: selectedEvent.customCategory || "",
       timeDisplay: timeFormatted.display,
       countdownNumber: timeFormatted.number,
       countdownUnit: timeFormatted.unit,
-      dateText: formatDateText(event.date),
+      dateText: formatDateText(selectedEvent.date),
       isPast: timeUntil.isPast,
     };
   } catch (error) {

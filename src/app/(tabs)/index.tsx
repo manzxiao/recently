@@ -56,7 +56,7 @@ function formatDate(dateStr: string): string {
 
 export default function EventsScreen() {
   const insets = useSafeAreaInsets();
-  const { events, loading, deleteEvent, refreshEvents } = useEvents();
+  const { events, loading, deleteEvent, updateEvent, refreshEvents } = useEvents();
 
   // Refresh events when screen comes into focus
   useFocusEffect(
@@ -83,6 +83,17 @@ export default function EventsScreen() {
       ]);
     },
     [deleteEvent]
+  );
+
+  const handleTogglePin = useCallback(
+    async (id: string, currentPinState: boolean) => {
+      try {
+        await updateEvent({ id, isPinned: !currentPinState });
+      } catch (error) {
+        Alert.alert("错误", "操作失败，请重试");
+      }
+    },
+    [updateEvent]
   );
 
   return (
@@ -144,6 +155,19 @@ export default function EventsScreen() {
                     >
                       {formatTimeUnit(timeUntil, isPast)}
                     </Text>
+
+                    {/* Pin Button */}
+                    <Pressable
+                      onPress={() => handleTogglePin(event.id, event.isPinned || false)}
+                      className="w-8 h-8 items-center justify-center active:opacity-60 mr-2"
+                    >
+                      <SymbolView
+                        name={event.isPinned ? "pin.fill" : "pin"}
+                        size={18}
+                        type="hierarchical"
+                        tintColor={event.isPinned ? "#D97757" : "#C4B5A3"}
+                      />
+                    </Pressable>
 
                     {/* Delete Button */}
                     <Pressable
