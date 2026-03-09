@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="时光簿 - 优雅的倒计时工具，记录每一个重要时刻">
+    <title>时光簿 Recently</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: #FAF8F5;
+            color: #3A3530;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 120px;
+            margin-bottom: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 300;
+            color: #3A3530;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #9B8F7F;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .feature {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(58, 53, 48, 0.04);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #3A3530;
+            margin-bottom: 4px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #9B8F7F;
+            line-height: 1.5;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #D97757;
+            color: white;
+            box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #C86646;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(217, 119, 87, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #3A3530;
+            border: 1px solid #E8E3DB;
+        }
+
+        .btn-secondary:hover {
+            background: #FAF8F5;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid #E8E3DB;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .footer-link {
+            color: #9B8F7F;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: #D97757;
+        }
+
+        .copyright {
+            font-size: 13px;
+            color: #C4B5A3;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📅</div>
+
+        <h1>时光簿</h1>
+        <p class="tagline">优雅的倒计时工具<br>记录每一个重要时刻</p>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📅</div>
+                <div class="feature-title">事件管理</div>
+                <div class="feature-desc">支持重复提醒、自定义分类</div>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-title">简约设计</div>
+                <div class="feature-desc">日式极简美学、温暖配色</div>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title">桌面小组件</div>
+                <div class="feature-desc">实时倒计时、一目了然</div>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <div class="feature-title">数据安全</div>
+                <div class="feature-desc">本地存储、保护隐私</div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <a href="https://github.com/manzxiao/recently" class="btn btn-primary">
+                <span>📦</span>
+                <span>查看源代码</span>
+            </a>
+            <a href="privacy.html" class="btn btn-secondary">
+                <span>🔒</span>
+                <span>隐私政策</span>
+            </a>
+        </div>
+
+        <div class="footer">
+            <div class="footer-links">
+                <a href="https://github.com/manzxiao/recently" class="footer-link">GitHub</a>
+                <a href="https://github.com/manzxiao/recently/issues" class="footer-link">反馈问题</a>
+                <a href="privacy.html" class="footer-link">隐私政策</a>
+            </div>
+            <p class="copyright">© 2026 时光簿 · 本地优先，隐私至上</p>
+        </div>
+    </div>
+</body>
+</html>
