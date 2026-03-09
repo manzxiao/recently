@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getDisplayDate } from "../utils/repeat";
 
 const STORAGE_KEY = "@recently_events";
+
+export type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
 export interface Event {
   id: string;
@@ -11,6 +14,7 @@ export interface Event {
   emoji: string;
   createdAt: string;
   isPinned?: boolean; // 是否优先显示在 widget
+  repeatType?: RepeatType; // 重复类型
 }
 
 export interface EventWidgetData {
@@ -109,34 +113,41 @@ export async function selectNextEvent(): Promise<EventWidgetData> {
     const events: Event[] = JSON.parse(data);
     const now = new Date();
 
+    // Map events with their display dates (considering repeat)
+    const eventsWithDisplayDates = events.map((event) => ({
+      event,
+      displayDate: getDisplayDate(event),
+    }));
+
     // Find upcoming events
-    const upcomingEvents = events.filter((event) => {
-      const eventDate = new Date(event.date);
+    const upcomingEvents = eventsWithDisplayDates.filter((item) => {
+      const eventDate = new Date(item.displayDate);
       return eventDate >= now;
     });
 
     if (upcomingEvents.length === 0) return EMPTY_EVENT;
 
     // Check for pinned events first
-    const pinnedEvents = upcomingEvents.filter((event) => event.isPinned === true);
+    const pinnedEvents = upcomingEvents.filter((item) => item.event.isPinned === true);
 
-    let selectedEvent: Event;
+    let selectedItem: { event: Event; displayDate: string };
 
     if (pinnedEvents.length > 0) {
       // If there are pinned events, select the nearest pinned event
       pinnedEvents.sort((a, b) => {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        return new Date(a.displayDate).getTime() - new Date(b.displayDate).getTime();
       });
-      selectedEvent = pinnedEvents[0];
+      selectedItem = pinnedEvents[0];
     } else {
       // Otherwise, select the nearest upcoming event
       upcomingEvents.sort((a, b) => {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        return new Date(a.displayDate).getTime() - new Date(b.displayDate).getTime();
       });
-      selectedEvent = upcomingEvents[0];
+      selectedItem = upcomingEvents[0];
     }
 
-    const timeUntil = getTimeUntil(selectedEvent.date);
+    const { event: selectedEvent, displayDate } = selectedItem;
+    const timeUntil = getTimeUntil(displayDate);
     const timeFormatted = formatTimeForWidget(timeUntil, timeUntil.isPast);
 
     return {
@@ -147,7 +158,7 @@ export async function selectNextEvent(): Promise<EventWidgetData> {
       timeDisplay: timeFormatted.display,
       countdownNumber: timeFormatted.number,
       countdownUnit: timeFormatted.unit,
-      dateText: formatDateText(selectedEvent.date),
+      dateText: formatDateText(displayDate),
       isPast: timeUntil.isPast,
     };
   } catch (error) {

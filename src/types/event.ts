@@ -1,5 +1,7 @@
 export type EventCategory = "birthday" | "exam" | "anniversary" | "other";
 
+export type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
+
 export interface Event {
   id: string;
   title: string;
@@ -9,6 +11,7 @@ export interface Event {
   emoji: string;
   createdAt: string; // ISO timestamp
   isPinned?: boolean; // Priority display on widget
+  repeatType?: RepeatType; // Repeat frequency (default: "none")
 }
 
 export interface CreateEventInput {
@@ -18,6 +21,7 @@ export interface CreateEventInput {
   customCategory?: string;
   emoji: string;
   isPinned?: boolean;
+  repeatType?: RepeatType;
 }
 
 export interface UpdateEventInput extends Partial<CreateEventInput> {

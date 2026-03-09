@@ -1,0 +1,28 @@
+<svg width="652" height="606" viewBox="0 0 652 606" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 简约日历图标 - 日式极简风格 -->
+  <!-- 外框 -->
+  <rect x="126" y="103" width="400" height="450" rx="40" fill="white" stroke="none"/>
+
+  <!-- 顶部装饰条 -->
+  <rect x="126" y="103" width="400" height="80" rx="40" fill="#D97757" stroke="none"/>
+  <path d="M 126 143 Q 126 183 166 183 L 486 183 Q 526 183 526 143 L 526 103 L 126 103 Z" fill="#D97757"/>
+
+  <!-- 日历网格线 -->
+  <!-- 横线 -->
+  <line x1="166" y1="243" x2="486" y2="243" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="166" y1="323" x2="486" y2="323" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="166" y1="403" x2="486" y2="403" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="166" y1="483" x2="486" y2="483" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 竖线 -->
+  <line x1="246" y1="213" x2="246" y2="523" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="326" y1="213" x2="326" y2="523" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="406" y1="213" x2="406" y2="523" stroke="#E8E3DB" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 重点日期标记 - 圆形高亮 -->
+  <circle cx="286" cy="363" r="28" fill="#D97757" opacity="0.9"/>
+
+  <!-- 装饰点 -->
+  <circle cx="206" cy="283" r="6" fill="#9B8F7F" opacity="0.6"/>
+  <circle cx="366" cy="443" r="6" fill="#9B8F7F" opacity="0.6"/>
+</svg>

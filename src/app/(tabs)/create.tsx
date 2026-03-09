@@ -16,7 +16,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEvents } from "../../hooks/useEvents";
-import { EventCategory } from "../../types/event";
+import { EventCategory, RepeatType } from "../../types/event";
+import { getRepeatLabel, getRepeatIcon } from "../../utils/repeat";
 
 // Extended emoji presets with categories
 const EMOJI_CATEGORIES = {
@@ -105,6 +106,8 @@ export default function CreateEventScreen() {
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
   const [creating, setCreating] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [repeatType, setRepeatType] = useState<RepeatType>("none");
+  const [showRepeatPicker, setShowRepeatPicker] = useState(false);
 
   // Emoji selection states
   const [showAllEmojis, setShowAllEmojis] = useState(false);
@@ -176,6 +179,7 @@ export default function CreateEventScreen() {
         customCategory: customCategoryLabel.trim() || undefined,
         emoji: selectedEmoji,
         isPinned: isPinned,
+        repeatType: repeatType,
       });
 
       // Reset form
@@ -185,6 +189,7 @@ export default function CreateEventScreen() {
       setSelectedCategory("exam");
       setCustomCategoryLabel("");
       setIsPinned(false);
+      setRepeatType("none");
 
       // Show success and navigate to list
       Alert.alert("成功", "事件创建成功！", [
@@ -461,6 +466,107 @@ export default function CreateEventScreen() {
                 onChange={handleDateChange}
               />
             )}
+          </View>
+
+          {/* Repeat Selection */}
+          <View className="mb-8">
+            <Text className="text-[#3A3530] text-[13px] mb-3 tracking-wide" style={{ fontWeight: "600" }}>
+              重复
+            </Text>
+
+            <Pressable
+              onPress={() => setShowRepeatPicker(true)}
+              className="bg-white rounded-2xl px-5 py-4 flex-row items-center justify-between"
+              style={{
+                shadowColor: "#3A3530",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.03,
+                shadowRadius: 8,
+                elevation: 1,
+              }}
+            >
+              <View className="flex-row items-center flex-1">
+                <SymbolView
+                  name={getRepeatIcon(repeatType)}
+                  size={20}
+                  type="hierarchical"
+                  tintColor={repeatType === "none" ? "#9B8F7F" : "#D97757"}
+                />
+                <Text
+                  className={`ml-3 text-[15px] ${repeatType === "none" ? "text-[#9B8F7F]" : "text-[#3A3530]"}`}
+                  style={{ fontWeight: "500" }}
+                >
+                  {getRepeatLabel(repeatType)}
+                </Text>
+              </View>
+              <SymbolView name="chevron.right" size={16} type="hierarchical" tintColor="#C4B5A3" />
+            </Pressable>
+
+            {/* Repeat Picker Modal */}
+            <Modal
+              visible={showRepeatPicker}
+              transparent
+              animationType="slide"
+              onRequestClose={() => setShowRepeatPicker(false)}
+            >
+              <Pressable
+                className="flex-1 bg-black/30 justify-end"
+                onPress={() => setShowRepeatPicker(false)}
+              >
+                <Pressable onPress={(e) => e.stopPropagation()}>
+                  <View className="bg-white rounded-t-3xl overflow-hidden">
+                    {/* Header */}
+                    <View className="py-4 px-6 border-b border-[#E8E3DB] flex-row items-center justify-between">
+                      <Text className="text-[#3A3530] text-[17px]" style={{ fontWeight: "600" }}>
+                        选择重复
+                      </Text>
+                      <Pressable onPress={() => setShowRepeatPicker(false)}>
+                        <Text className="text-[#D97757] text-[15px]" style={{ fontWeight: "600" }}>
+                          完成
+                        </Text>
+                      </Pressable>
+                    </View>
+
+                    {/* Repeat Options */}
+                    <View className="py-2">
+                      {(["none", "daily", "weekly", "monthly", "yearly"] as RepeatType[]).map((type) => (
+                        <Pressable
+                          key={type}
+                          onPress={() => {
+                            setRepeatType(type);
+                            setShowRepeatPicker(false);
+                          }}
+                          className="px-6 py-4 flex-row items-center justify-between active:bg-[#FAF8F5]"
+                        >
+                          <View className="flex-row items-center flex-1">
+                            <SymbolView
+                              name={getRepeatIcon(type)}
+                              size={20}
+                              type="hierarchical"
+                              tintColor={repeatType === type ? "#D97757" : "#9B8F7F"}
+                            />
+                            <Text
+                              className={`ml-3 text-[15px] ${
+                                repeatType === type ? "text-[#D97757]" : "text-[#3A3530]"
+                              }`}
+                              style={{ fontWeight: repeatType === type ? "600" : "400" }}
+                            >
+                              {getRepeatLabel(type)}
+                            </Text>
+                          </View>
+                          {repeatType === type && (
+                            <SymbolView name="checkmark" size={18} type="hierarchical" tintColor="#D97757" />
+                          )}
+                        </Pressable>
+                      ))}
+                    </View>
+
+                    {/* Bottom Safe Area */}
+                    <View style={{ paddingBottom: insets.bottom || 20 }} />
+                  </View>
+                </Pressable>
+              </Pressable>
+            </Modal>
           </View>
 
           {/* Pin to Widget Toggle */}

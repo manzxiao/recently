@@ -4,6 +4,7 @@ import { SymbolView } from "expo-symbols";
 import { useEvents } from "../../hooks/useEvents";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
+import { getDisplayDate, getRepeatLabel } from "../../utils/repeat";
 
 // Calculate time until
 function getTimeUntil(targetDateStr: string): { days: number; hours: number; minutes: number; isPast: boolean } {
@@ -126,7 +127,8 @@ export default function EventsScreen() {
           </View>
         ) : (
           events.map((event) => {
-            const timeUntil = getTimeUntil(event.date);
+            const displayDate = getDisplayDate(event);
+            const timeUntil = getTimeUntil(displayDate);
             const { isPast } = timeUntil;
 
             return (
@@ -184,10 +186,26 @@ export default function EventsScreen() {
                   </Text>
 
                   {/* Event Date and Category */}
-                  <View className="flex-row items-center">
+                  <View className="flex-row items-center flex-wrap">
                     <Text className="text-[#9B8F7F] text-[14px]" style={{ fontWeight: "400" }}>
-                      {formatDate(event.date)}
+                      {formatDate(displayDate)}
                     </Text>
+                    {event.repeatType && event.repeatType !== "none" && (
+                      <>
+                        <View className="w-1 h-1 rounded-full bg-[#C4B5A3] mx-2" />
+                        <View className="flex-row items-center">
+                          <SymbolView
+                            name="arrow.clockwise"
+                            size={12}
+                            type="hierarchical"
+                            tintColor="#D97757"
+                          />
+                          <Text className="text-[#D97757] text-[13px] ml-1" style={{ fontWeight: "500" }}>
+                            {getRepeatLabel(event.repeatType)}
+                          </Text>
+                        </View>
+                      </>
+                    )}
                     {event.customCategory && (
                       <>
                         <View className="w-1 h-1 rounded-full bg-[#C4B5A3] mx-2" />
