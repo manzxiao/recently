@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "recently",
+    "name": "时光簿",
     "slug": "recently",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,18 +9,25 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.manzxiao.recently",
+      "buildNumber": "1",
+      "supportsTablet": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "时光簿需要访问相册以保存和分享事件截图",
+        "NSCalendarsUsageDescription": "时光簿需要访问日历以创建提醒事件"
       }
     },
     "android": {
+      "package": "com.manzxiao.recently",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#FAF8F5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": []
     },
     "web": {
       "output": "static",
