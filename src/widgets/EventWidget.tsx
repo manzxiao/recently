@@ -7,11 +7,33 @@ function EventWidgetView(props: WidgetBase<EventWidgetData>) {
   "widget";
 
   const titleFont = font({ size: 15, weight: "medium" });
-  const largeNumber = font({ size: 100, weight: "semibold" });
-  const mediumNumber = font({ size: 72, weight: "semibold" });
-  const smallNumber = font({ size: 80, weight: "semibold" });
   const unitFont = font({ size: 13, weight: "regular" });
   const dateFont = font({ size: 11, weight: "regular" });
+
+  // Dynamic font size based on number length
+  const getNumberFont = (numberStr: string, widgetSize: "small" | "medium" | "large") => {
+    const digitCount = numberStr.length;
+
+    if (widgetSize === "small") {
+      if (digitCount === 1) return font({ size: 80, weight: "semibold" });
+      if (digitCount === 2) return font({ size: 72, weight: "semibold" });
+      if (digitCount === 3) return font({ size: 60, weight: "semibold" });
+      return font({ size: 36, weight: "semibold" }); // 4+ digits
+    }
+
+    if (widgetSize === "large") {
+      if (digitCount === 1) return font({ size: 100, weight: "semibold" });
+      if (digitCount === 2) return font({ size: 88, weight: "semibold" });
+      if (digitCount === 3) return font({ size: 72, weight: "semibold" });
+      return font({ size: 60, weight: "semibold" }); // 4+ digits
+    }
+
+    // medium
+    if (digitCount === 1) return font({ size: 72, weight: "semibold" });
+    if (digitCount === 2) return font({ size: 68, weight: "semibold" });
+    if (digitCount === 3) return font({ size: 60, weight: "semibold" });
+    return font({ size: 52, weight: "semibold" }); // 4+ digits
+  };
 
   // Empty state - clean and minimal
   if (!props.hasEvent) {
@@ -66,16 +88,17 @@ function EventWidgetView(props: WidgetBase<EventWidgetData>) {
   // Home screen widgets
   if (props.family === "systemSmall") {
     return (
-      <VStack alignment="leading" spacing={2} modifiers={[padding({ all: 12 })]}>
+      <VStack alignment="center" >
         {/* Title at top */}
         <Text modifiers={[titleFont, foregroundStyle("primary")]}>
           {props.title}
         </Text>
 
+        <Spacer />
 
         {/* Large countdown number - vibrant and bold */}
         <VStack alignment="center" spacing={2}>
-          <Text modifiers={[smallNumber, foregroundStyle(numberColor)]}>
+          <Text modifiers={[getNumberFont(props.countdownNumber, "small"), foregroundStyle(numberColor)]}>
             {props.countdownNumber}
           </Text>
           <Text modifiers={[unitFont, foregroundStyle("secondary")]}>
@@ -83,7 +106,9 @@ function EventWidgetView(props: WidgetBase<EventWidgetData>) {
           </Text>
         </VStack>
 
-        {/* Date at bottom */}
+        <Spacer />
+
+        {/* Date at bottom - centered */}
         <Text modifiers={[dateFont, foregroundStyle("tertiary")]}>
           {props.dateText}
         </Text>
@@ -93,16 +118,17 @@ function EventWidgetView(props: WidgetBase<EventWidgetData>) {
 
   if (props.family === "systemLarge") {
     return (
-      <VStack alignment="leading" spacing={8} modifiers={[padding({ all: 16 })]}>
+      <VStack alignment="center" spacing={8} modifiers={[padding({ all: 16 })]}>
         {/* Title at top */}
         <Text modifiers={[titleFont, foregroundStyle("primary")]}>
           {props.title}
         </Text>
 
+        <Spacer />
 
         {/* Center: Large countdown number */}
         <VStack alignment="center" spacing={4}>
-          <Text modifiers={[largeNumber, foregroundStyle(numberColor)]}>
+          <Text modifiers={[getNumberFont(props.countdownNumber, "large"), foregroundStyle(numberColor)]}>
             {props.countdownNumber}
           </Text>
           <Text modifiers={[unitFont, foregroundStyle("secondary")]}>
@@ -110,7 +136,9 @@ function EventWidgetView(props: WidgetBase<EventWidgetData>) {
           </Text>
         </VStack>
 
-        {/* Bottom: Date */}
+        <Spacer />
+
+        {/* Bottom: Date - centered */}
         <Text modifiers={[dateFont, foregroundStyle("tertiary")]}>
           {props.dateText}
         </Text>
@@ -142,7 +170,7 @@ function EventWidgetView(props: WidgetBase<EventWidgetData>) {
 
       {/* 右侧：大号倒计时数字 */}
       <VStack alignment="center" spacing={0}>
-        <Text modifiers={[mediumNumber, foregroundStyle(numberColor)]}>
+        <Text modifiers={[getNumberFont(props.countdownNumber, "medium"), foregroundStyle(numberColor)]}>
           {props.countdownNumber}
         </Text>
       </VStack>
